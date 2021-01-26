@@ -17,6 +17,21 @@ def getRandomPrintable():
     return ret
 
 
+def isPrintable(toCheck):
+    """Check if a string is made of printable.
+
+    Only accepts spaces as printable whitespace
+    """
+    if not isinstance(toCheck, str):
+        raise TypeError("Utils.isPrintable only accepts strings")
+
+    for char in toCheck:
+        if char != " ":
+            if char.isspace() or char not in string.printable:
+                return False
+    return True
+
+
 def generateRandomString(length):
     """Generate a random string with the given length."""
     randomStr = ""

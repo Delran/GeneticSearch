@@ -1,5 +1,5 @@
 """Main file for Genetic search algorithm."""
-from GeneticSearch import GeneticSearch
+from GeneticSearch.StringSearch import StringSearch
 
 
 def main():
@@ -7,11 +7,11 @@ def main():
     population = 500
     mutationRate = 0.5
     selectionRate = 0.25
-    search = GeneticSearch("Je cherche cette phrase",
-                           population, mutationRate, selectionRate)
+    search = StringSearch("Je cherche ça phrase",
+                          population, mutationRate, selectionRate)
     search.start()
 
 
 if __name__ == "__main__":
-    # execute only if run as a script
+    # Execute only if run as a script
     main()
