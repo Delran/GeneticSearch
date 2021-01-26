@@ -37,9 +37,31 @@ class AbstractSearch(ABC):
                                                       numbers.Number):
             print("MutateRate is None or not a number")
             valid = False
+
+        elif 0.0 <= self._mutateRate <= 100.0:
+            self._mutateRate /= 100
+        else:
+            print(f"{self._mutateRate} is an incorrect value "
+                  "for a mutation rate, value should be given in percent")
+            valid = False
+
         if self._selectRate is None or not isinstance(self._selectRate,
                                                       numbers.Number):
             print("SelectRate is None or not a number")
+            valid = False
+        elif 0.0 <= self._selectRate <= 100.0:
+            self._selectRate /= 100
+            nbSelect = self._selectRate * self._population
+            if nbSelect < 1:
+                print("The selection rate is too small "
+                      "for the given population, "
+                      "either increase the selection rate or the population\n"
+                      f"{self._selectRate} * {self._population} = {nbSelect}")
+
+                valid = False
+        else:
+            print(f"{self._selectRate} is an incorrect value "
+                  "for a selection rate, value should be given in percent")
             valid = False
 
         return valid
