@@ -5,7 +5,7 @@ import Utils
 
 
 class StringSearch(AbstractSearch):
-    """docstring for StringSearch."""
+    """Search for the given string using the a genetic search."""
 
     def __init__(self, finalString, population, mutateRate, selectRate):
         """Init string genetic search algorithm."""
@@ -19,8 +19,8 @@ class StringSearch(AbstractSearch):
 
         Check if the finalString has any unsuported chars
         """
-        self._valid = super()._validate()
 
+        self._valid = super()._validate()
         if self._valid:
             if (self.__finalString is None
                or type(self.__finalString) is not str):
