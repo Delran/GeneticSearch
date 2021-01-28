@@ -7,20 +7,20 @@ def main():
     """Entry point function for genetic search algorithm."""
     # The higher the population is, the less number of generation
     # is needed to find the solution
-    population = 1000
+    population = 100
     # Higher rate of mutation give more stable results
     # while lower rate of mutation results are better
     # in best cases and worst in the worses cases
-    mutationRate = 30
+    mutationRate = 50
     # Lower selection rates works best combined with high population
     # High selection rates on high population can severly increase
     # computation time
-    selectionRate = 35
+    selectionRate = 50
     search = StringSearch("Je cherche cette phrase",
                           population, mutationRate, selectionRate)
     # search.start()
 
-    searchIt = ItinerarySearch(10, (100, 100), 0,
+    searchIt = ItinerarySearch(50, (1000, 1000), 10,
                                population, mutationRate, selectionRate)
     searchIt.start()
 

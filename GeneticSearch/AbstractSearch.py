@@ -79,12 +79,14 @@ class AbstractSearch(ABC):
         items = self._generatePopulation()
 
         generations = 0
+
         while True:
             # We sort the population their fitness
-            items = Utils.quickSort(items,
-                                    sortFn=lambda item: self._fitness(item))
+            # _sortFunction can be redefined by children
+            items = Utils.quickSort(items, sortFn=self._sortFunction)
             # Polymorphic print and endCondition functions
             self._print(items[0])
+            print(self._fitness(items[0]))
             if self._endCondition(items[0]):
                 break
 
@@ -96,6 +98,16 @@ class AbstractSearch(ABC):
         end = time.perf_counter()
         # Polymorphic finish function
         self._finish(generations, end - start)
+
+    def _sortFunction(self, pivot, item):
+        pivot = self._fitness(pivot)
+        item = self._fitness(item)
+        if item < pivot:
+            return 1
+        elif item > pivot:
+            return -1
+        else:
+            return 0
 
     def _finish(self, generations, time):
         print(f"Population     : {self._population}")

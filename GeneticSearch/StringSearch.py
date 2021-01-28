@@ -19,7 +19,6 @@ class StringSearch(AbstractSearch):
 
         Check if the finalString has any unsuported chars
         """
-
         self._valid = super()._validate()
         if self._valid:
             if (self.__finalString is None

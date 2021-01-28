@@ -79,14 +79,14 @@ def quickSort(list, sortFn):
     nbAbove = 0
     nbBelow = 0
 
-    pivot = sortFn(list[0])
+    pivot = list[0]
     for item in list:
         # Getting sorting function result for current item
-        i = sortFn(item)
-        if i < pivot:
+        ret = sortFn(pivot, item)
+        if ret == 1:
             nbAbove += 1
             greater.append(item)
-        elif i > pivot:
+        elif ret == -1:
             nbBelow += 1
             lesser.append(item)
         else:
