@@ -1,15 +1,28 @@
 """Main file for Genetic search algorithm."""
 from GeneticSearch.StringSearch import StringSearch
+from GeneticSearch.ItinerarySearch import ItinerarySearch
 
 
 def main():
     """Entry point function for genetic search algorithm."""
-    population = 50
-    mutationRate = 75
-    selectionRate = 1.5
+    # The higher the population is, the less number of generation
+    # is needed to find the solution
+    population = 1000
+    # Higher rate of mutation give more stable results
+    # while lower rate of mutation results are better
+    # in best cases and worst in the worses cases
+    mutationRate = 30
+    # Lower selection rates works best combined with high population
+    # High selection rates on high population can severly increase
+    # computation time
+    selectionRate = 35
     search = StringSearch("Je cherche cette phrase",
                           population, mutationRate, selectionRate)
-    search.start()
+    # search.start()
+
+    searchIt = ItinerarySearch(10, (100, 100), 0,
+                               population, mutationRate, selectionRate)
+    searchIt.start()
 
 
 if __name__ == "__main__":
