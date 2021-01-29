@@ -2,6 +2,7 @@
 
 import random
 import numbers
+import time
 import math
 
 import matplotlib.pyplot as plt
@@ -22,7 +23,7 @@ class ItinerarySearch(AbstractSearch):
     """docstring for ItinerarySearch."""
 
     # Markov chains generator for French town names
-    __nameGenerator = TownNameGenerator(7, 30)
+    __nameGenerator = TownNameGenerator(7, 60)
 
     def __init__(self, towns, boardSize, end,
                  population, mutateRate, selectRate):
@@ -34,6 +35,7 @@ class ItinerarySearch(AbstractSearch):
         self.__nbTowns = towns
         self.__boardSize = boardSize
         self.__last = math.inf
+        self.__mostFit = math.inf
         super(ItinerarySearch, self).__init__(population,
                                               mutateRate,
                                               selectRate)
@@ -65,7 +67,9 @@ class ItinerarySearch(AbstractSearch):
         if not self._valid:
             return
 
+        self._generateTime = time.perf_counter()
         self.__generateTowns(self.__nbTowns)
+        self._generateTime = time.perf_counter() - self._generateTime
 
         super().start()
 
@@ -101,7 +105,7 @@ class ItinerarySearch(AbstractSearch):
         else:
             return 0
 
-    def _finish(self, generations, time, selectTime, crossTime, mutateTime):
+    def _finish(self):
 
         figure = plt.figure()
         _xlim = (0, self.__boardSize[0])
@@ -110,15 +114,6 @@ class ItinerarySearch(AbstractSearch):
         ax.axes.xaxis.set_visible(False)
         ax.axes.yaxis.set_visible(False)
         self.__ln, = ax.plot(0, 0, '-o')
-
-        # abscissa = []
-        # ordinates = []
-        # mostFit = self._generationMostFits[-1]
-        # for id in mostFit:
-        #     abscissa.append(self.__towns[id].x)
-        #     ordinates.append(self.__towns[id].y)
-
-        # self.__ln.set_data(abscissa, ordinates)
 
         abscissa = []
         ordinates = []
@@ -129,19 +124,21 @@ class ItinerarySearch(AbstractSearch):
 
         texts = []
         for x, y, id in zip(abscissa, ordinates, mostFit):
-            texts.append(ax.text(x, y, self.__towns[id].name, color='green'))
+            texts.append(ax.text(x, y, self.__towns[id].name))
 
         for txt in figure.texts:
             txt.remove()
         # Adusting text so it don't overlap
-        # adjust_text(texts, autoalign='y',
-        #             only_move={'points': 'xy', 'text': 'xy'},
-        #             force_points=0.5, force_text=0.5,
-        #             arrowprops=dict(arrowstyle="-", color='b', lw=0.8))
+        adjust_text(texts, autoalign='y',
+                    only_move={'points': 'xy', 'text': 'xy'},
+                    force_points=0.5, force_text=0.5,
+                    arrowprops=dict(arrowstyle="-", color='b', lw=0.8))
 
-        ani = FuncAnimation(figure, self.__update, blit=True, interval=200)
+        self.__ani = FuncAnimation(figure, self.__update,
+                                   blit=True, interval=200)
         plt.show()
-        super()._finish(generations, time, selectTime, crossTime, mutateTime)
+        super()._finish()
+        print(f"Time in generate : {self._generateTime:0.4f} seconds")
 
     __updateGeneration = 0
 
@@ -157,15 +154,10 @@ class ItinerarySearch(AbstractSearch):
             abscissa.append(self.__towns[id].x)
             ordinates.append(self.__towns[id].y)
 
-        texts = []
-        for x, y, id in zip(abscissa, ordinates, mostFit):
-            texts.append(plt.text(x, y, self.__towns[id].name))
-
-        # # Adusting text so it don't overlap
-        # adjust_text(texts, autoalign='y',
-        #             only_move={'points': 'xy', 'text': 'xy'},
-        #             force_points=0.5, force_text=0.5,
-        #             arrowprops=dict(arrowstyle="-", color='b', lw=0.8))
+        # Adding first element a second time to link
+        # the last point to the first
+        abscissa.append(self.__towns[mostFit[0]].x)
+        ordinates.append(self.__towns[mostFit[0]].y)
 
         self.__ln.set_data(abscissa, ordinates)
         return self.__ln,
@@ -241,6 +233,10 @@ class ItinerarySearch(AbstractSearch):
             src = self.__towns[item[i]]
             dist = self.__towns[item[i+1]]
             totalDist += Towns.distance(src, dist)
+
+        # Compute distance between first and last element
+        totalDist += Towns.distance(self.__towns[item[-1]],
+                                    self.__towns[item[0]])
         return totalDist
 
     def _select(self, list, descending=True):
@@ -249,23 +245,30 @@ class ItinerarySearch(AbstractSearch):
     def _mutate(self, toMutate):
         # Must return mutated item
 
+        length = len(toMutate)
         # Randrange up to len - 1 as we will invert item at i and i+1
-        index = random.randrange(len(toMutate)-1)
+        index = random.randrange(length)
         tmp = toMutate[index]
-        toMutate[index] = toMutate[index + 1]
-        toMutate[index + 1] = tmp
+        indexUp = (index + 1) % length
+        toMutate[index] = toMutate[indexUp]
+        toMutate[indexUp] = tmp
         return toMutate
 
     def _endCondition(self, mostFit):
         # Must returns true if end conditions are met
         fitness = self._fitness(mostFit)
-        if fitness == self.__last:
-            self.__endCount += 1
-            if self.__endCount >= self.__end:
-                return True
-        else:
-            self.__endCount = 0
-        self.__last = fitness
+
+        if fitness < self.__mostFit:
+            self.__mostFit = fitness
+
+        if fitness <= self.__mostFit:
+            if fitness == self.__last:
+                self.__endCount += 1
+                if self.__endCount >= self.__end:
+                    return True
+            else:
+                self.__endCount = 0
+            self.__last = fitness
         return False
 
     def _print(self, item):

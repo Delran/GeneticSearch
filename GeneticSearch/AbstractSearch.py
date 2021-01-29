@@ -74,9 +74,9 @@ class AbstractSearch(ABC):
             print("Parameters are not valid")
             return
 
-        selectTime = 0
-        crossTime = 0
-        mutateTime = 0
+        self._selectTime = 0
+        self._crossTime = 0
+        self._mutateTime = 0
 
         start = time.perf_counter()
 
@@ -84,7 +84,7 @@ class AbstractSearch(ABC):
         # Defined by child class
         items = self._generatePopulation()
 
-        generations = 0
+        self._generations = 0
 
         while True:
             # Implemented a quickSort before realising that python list had
@@ -96,7 +96,7 @@ class AbstractSearch(ABC):
 
             selection = self._select(items)
 
-            selectTime += time.perf_counter() - timer
+            self._selectTime += time.perf_counter() - timer
             timer = time.perf_counter()
 
             # Polymorphic print and endCondition functions
@@ -104,24 +104,24 @@ class AbstractSearch(ABC):
 
             self._generationMostFits.append(mostFit)
             self._print(mostFit)
-            # print(self._fitness(mostFit))
+            print(self._fitness(mostFit))
             if self._endCondition(mostFit):
                 break
 
             crossed = self.__getCrossed(selection)
 
-            crossTime += time.perf_counter() - timer
+            self._crossTime += time.perf_counter() - timer
             timer = time.perf_counter()
 
             items = self.__getMutated(crossed)
 
-            mutateTime += time.perf_counter() - timer
+            self._mutateTime += time.perf_counter() - timer
 
-            generations += 1
+            self._generations += 1
 
-        end = time.perf_counter() - start
+        self._time = time.perf_counter() - start
         # Polymorphic finish function
-        self._finish(generations, end, selectTime, crossTime, mutateTime)
+        self._finish()
 
     def _sortFunction(self, pivot, item):
         pivot = self._fitness(pivot)
@@ -133,15 +133,15 @@ class AbstractSearch(ABC):
         else:
             return 0
 
-    def _finish(self, generations, time, selectTime, crossTime, mutateTime):
+    def _finish(self):
         print(f"Population     : {self._population}")
         print(f"Selection rate : {self._selectRate}")
         print(f"Mutation rate  : {self._mutateRate}")
-        print(f"Generations    : {generations}")
-        print(f"Elapsed time   : {time:0.4f} seconds")
-        print(f"Time in select : {selectTime:0.4f} seconds")
-        print(f"Time in cross  : {crossTime:0.4f} seconds")
-        print(f"Time in mutate : {mutateTime:0.4f} seconds")
+        print(f"Generations    : {self._generations}")
+        print(f"Elapsed time   : {self._time:0.4f} seconds")
+        print(f"Time in select : {self._selectTime:0.4f} seconds")
+        print(f"Time in cross  : {self._crossTime:0.4f} seconds")
+        print(f"Time in mutate : {self._mutateTime:0.4f} seconds")
 
     def __print(self, list):
         for item in list:
