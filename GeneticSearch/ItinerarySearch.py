@@ -167,6 +167,9 @@ class ItinerarySearch(AbstractSearch):
             totalDist += Towns.distance(src, dist)
         return totalDist
 
+    def _select(self, list, descending=True):
+        return super()._select(list, descending=False)
+
     def _mutate(self, toMutate):
         # Must return mutated item
 

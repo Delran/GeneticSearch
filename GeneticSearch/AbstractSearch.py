@@ -72,7 +72,6 @@ class AbstractSearch(ABC):
             print("Parameters are not valid")
             return
 
-        sortingTime = 0
         selectTime = 0
         crossTime = 0
         mutateTime = 0
@@ -86,23 +85,24 @@ class AbstractSearch(ABC):
         generations = 0
 
         while True:
-            # We sort the population their fitness
-            # _sortFunction can be redefined by children
-            timer = time.perf_counter()
-            items = Utils.quickSort(items, sortFn=self._sortFunction)
-            sortingTime += time.perf_counter() - timer
-            # Polymorphic print and endCondition functions
-            self._print(items[0])
-            print(self._fitness(items[0]))
-            if self._endCondition(items[0]):
-                break
+            # Implemented a quickSort before realising that python list had
+            # a builtin timsort, list.sort is on average 5 times faster than
+            # my own shitty quickSort
+            # items = Utils.quickSort(items, sortFn=self._sortFunction)
 
             timer = time.perf_counter()
 
-            selection = self.__select(items)
+            selection = self._select(items)
 
             selectTime += time.perf_counter() - timer
             timer = time.perf_counter()
+
+            # Polymorphic print and endCondition functions
+            mostFit = selection[0]
+            self._print(mostFit)
+            print(self._fitness(mostFit))
+            if self._endCondition(mostFit):
+                break
 
             crossed = self.__getCrossed(selection)
 
@@ -117,7 +117,7 @@ class AbstractSearch(ABC):
 
         end = time.perf_counter() - start
         # Polymorphic finish function
-        self._finish(generations, end, selectTime, crossTime, mutateTime, sortingTime)
+        self._finish(generations, end, selectTime, crossTime, mutateTime)
 
     def _sortFunction(self, pivot, item):
         pivot = self._fitness(pivot)
@@ -129,7 +129,7 @@ class AbstractSearch(ABC):
         else:
             return 0
 
-    def _finish(self, generations, time, selectTime, crossTime, mutateTime, sortingTime):
+    def _finish(self, generations, time, selectTime, crossTime, mutateTime):
         print(f"Population     : {self._population}")
         print(f"Selection rate : {self._selectRate}")
         print(f"Mutation rate  : {self._mutateRate}")
@@ -138,7 +138,6 @@ class AbstractSearch(ABC):
         print(f"Time in select : {selectTime:0.4f} seconds")
         print(f"Time in cross  : {crossTime:0.4f} seconds")
         print(f"Time in mutate : {mutateTime:0.4f} seconds")
-        print(f"Time in sort   : {sortingTime:0.4f} seconds")
 
     def __print(self, list):
         for item in list:
@@ -179,8 +178,10 @@ class AbstractSearch(ABC):
             mutated.append(item)
         return mutated
 
-    def __select(self, list):
+    # Select is implemented by default
+    def _select(self, list, descending=True):
         """Only keeps the desired rate of the most fit items."""
+        list.sort(key=lambda item: self._fitness(item), reverse=descending)
         # List is sorted by fitness so not much to do here
         return list[:math.floor(self._selectRate*self._population)]
 

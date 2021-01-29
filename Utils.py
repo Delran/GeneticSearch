@@ -62,6 +62,7 @@ def changeOneChar(str):
     return ret
 
 
+# Deprecated, way to slow compared to python builtin list.sort()
 def quickSort(list, sortFn):
     """Quick sort with sorting function."""
     """Given list will be sorted using the function passed in argument"""
