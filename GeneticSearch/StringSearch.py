@@ -68,8 +68,8 @@ class StringSearch(AbstractSearch):
         """Finish if the most fit string maches finalString."""
         return str == self.__finalString
 
-    def _finish(self, generations, time, time2, time3, time4, time5):
+    def _finish(self, generations, time, time2, time3, time4):
         """Super calls this functions when algorithm finishes."""
         print(f"Found string   : {self.__finalString}")
         # Super finish will display general informations about the search
-        super()._finish(generations, time, time2, time3, time4, time5)
+        super()._finish(generations, time, time2, time3, time4)

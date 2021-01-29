@@ -17,6 +17,8 @@ class AbstractSearch(ABC):
     _selectRate = None
     _valid = True
 
+    _generationMostFits = []
+
     def __init__(self, population, mutateRate, selectRate):
         """Take four arguments, result, population, mutation, selection."""
         """Result is the string the algorithm will be looking for"""
@@ -99,8 +101,10 @@ class AbstractSearch(ABC):
 
             # Polymorphic print and endCondition functions
             mostFit = selection[0]
+
+            self._generationMostFits.append(mostFit)
             self._print(mostFit)
-            print(self._fitness(mostFit))
+            # print(self._fitness(mostFit))
             if self._endCondition(mostFit):
                 break
 

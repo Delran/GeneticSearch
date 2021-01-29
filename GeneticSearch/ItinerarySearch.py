@@ -4,6 +4,12 @@ import random
 import numbers
 import math
 
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# To adjust towns name in pyplot
+from adjustText import adjust_text
+
 from GeneticSearch.AbstractSearch import AbstractSearch
 from GeneticSearch.Towns import Town
 from MarkovGenerator.TownNameGenerator import TownNameGenerator
@@ -16,7 +22,7 @@ class ItinerarySearch(AbstractSearch):
     """docstring for ItinerarySearch."""
 
     # Markov chains generator for French town names
-    __nameGenerator = TownNameGenerator(7, 50)
+    __nameGenerator = TownNameGenerator(7, 30)
 
     def __init__(self, towns, boardSize, end,
                  population, mutateRate, selectRate):
@@ -60,6 +66,7 @@ class ItinerarySearch(AbstractSearch):
             return
 
         self.__generateTowns(self.__nbTowns)
+
         super().start()
 
     def __generateTowns(self, nbTowns):
@@ -94,6 +101,75 @@ class ItinerarySearch(AbstractSearch):
         else:
             return 0
 
+    def _finish(self, generations, time, selectTime, crossTime, mutateTime):
+
+        figure = plt.figure()
+        _xlim = (0, self.__boardSize[0])
+        _ylim = (0, self.__boardSize[1])
+        ax = figure.add_subplot(111, xlim=_xlim, ylim=_ylim)
+        ax.axes.xaxis.set_visible(False)
+        ax.axes.yaxis.set_visible(False)
+        self.__ln, = ax.plot(0, 0, '-o')
+
+        # abscissa = []
+        # ordinates = []
+        # mostFit = self._generationMostFits[-1]
+        # for id in mostFit:
+        #     abscissa.append(self.__towns[id].x)
+        #     ordinates.append(self.__towns[id].y)
+
+        # self.__ln.set_data(abscissa, ordinates)
+
+        abscissa = []
+        ordinates = []
+        mostFit = self._generationMostFits[0]
+        for id in mostFit:
+            abscissa.append(self.__towns[id].x)
+            ordinates.append(self.__towns[id].y)
+
+        texts = []
+        for x, y, id in zip(abscissa, ordinates, mostFit):
+            texts.append(ax.text(x, y, self.__towns[id].name, color='green'))
+
+        for txt in figure.texts:
+            txt.remove()
+        # Adusting text so it don't overlap
+        # adjust_text(texts, autoalign='y',
+        #             only_move={'points': 'xy', 'text': 'xy'},
+        #             force_points=0.5, force_text=0.5,
+        #             arrowprops=dict(arrowstyle="-", color='b', lw=0.8))
+
+        ani = FuncAnimation(figure, self.__update, blit=True, interval=200)
+        plt.show()
+        super()._finish(generations, time, selectTime, crossTime, mutateTime)
+
+    __updateGeneration = 0
+
+    def __update(self, frame):
+        if self.__updateGeneration >= len(self._generationMostFits):
+            return self.__ln,
+
+        abscissa = []
+        ordinates = []
+        mostFit = self._generationMostFits[self.__updateGeneration]
+        self.__updateGeneration += 1
+        for id in mostFit:
+            abscissa.append(self.__towns[id].x)
+            ordinates.append(self.__towns[id].y)
+
+        texts = []
+        for x, y, id in zip(abscissa, ordinates, mostFit):
+            texts.append(plt.text(x, y, self.__towns[id].name))
+
+        # # Adusting text so it don't overlap
+        # adjust_text(texts, autoalign='y',
+        #             only_move={'points': 'xy', 'text': 'xy'},
+        #             force_points=0.5, force_text=0.5,
+        #             arrowprops=dict(arrowstyle="-", color='b', lw=0.8))
+
+        self.__ln.set_data(abscissa, ordinates)
+        return self.__ln,
+
     def _generatePopulation(self):
         """Generate random itinerary between towns.
 
@@ -119,7 +195,7 @@ class ItinerarySearch(AbstractSearch):
         """
         # Keeping reminder for odd itineraries
         length = len(breeder1)
-        quotient = length / 2
+        quotient = int(length / 2)
         remainder = length % 2
 
         # Range from zero to half the itinerary + remainder
