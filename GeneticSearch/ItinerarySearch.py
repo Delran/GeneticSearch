@@ -75,8 +75,11 @@ class ItinerarySearch(AbstractSearch):
                 if coords not in allCoords:
                     break
 
+            # Keep track of the coordinates so we can avoid
+            # adding two towns at the same coordinates
             allCoords.append(coords)
-            town = Town(coords)
+            # Giving i as ID
+            town = Town(i, coords)
             self.__towns.append(town)
             town.name = nameList[i]
 
@@ -108,10 +111,21 @@ class ItinerarySearch(AbstractSearch):
         return itineraries
 
     def _cross(self, breeder1, breeder2):
-        # Must return crossed item
+        """Cross two itinerary, returns the crossed itinerary.
+
+        Itineraries are crossed by replacing half of the the breeder2 genetic
+        into the breeder1 and modifying breeder1's genetic material to respect
+        the rule of towns that should only be visited once
+        """
+        # Keeping reminder for odd itineraries
         length = len(breeder1)
-        start = random.randrange(length-1)
-        end = random.randint(start, length-1)
+        quotient = length / 2
+        remainder = length % 2
+
+        # Range from zero to half the itinerary + remainder
+        start = random.randrange(quotient + remainder)
+        # end at start + half the itinerary whtiout remainder
+        end = start + quotient
         crossed = []
         tmpRange = range(length)
         possible = list(tmpRange)

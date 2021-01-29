@@ -72,6 +72,11 @@ class AbstractSearch(ABC):
             print("Parameters are not valid")
             return
 
+        sortingTime = 0
+        selectTime = 0
+        crossTime = 0
+        mutateTime = 0
+
         start = time.perf_counter()
 
         # Initial population
@@ -83,21 +88,36 @@ class AbstractSearch(ABC):
         while True:
             # We sort the population their fitness
             # _sortFunction can be redefined by children
+            timer = time.perf_counter()
             items = Utils.quickSort(items, sortFn=self._sortFunction)
+            sortingTime += time.perf_counter() - timer
             # Polymorphic print and endCondition functions
             self._print(items[0])
             print(self._fitness(items[0]))
             if self._endCondition(items[0]):
                 break
 
+            timer = time.perf_counter()
+
             selection = self.__select(items)
+
+            selectTime += time.perf_counter() - timer
+            timer = time.perf_counter()
+
             crossed = self.__getCrossed(selection)
+
+            crossTime += time.perf_counter() - timer
+            timer = time.perf_counter()
+
             items = self.__getMutated(crossed)
+
+            mutateTime += time.perf_counter() - timer
+
             generations += 1
 
-        end = time.perf_counter()
+        end = time.perf_counter() - start
         # Polymorphic finish function
-        self._finish(generations, end - start)
+        self._finish(generations, end, selectTime, crossTime, mutateTime, sortingTime)
 
     def _sortFunction(self, pivot, item):
         pivot = self._fitness(pivot)
@@ -109,12 +129,16 @@ class AbstractSearch(ABC):
         else:
             return 0
 
-    def _finish(self, generations, time):
+    def _finish(self, generations, time, selectTime, crossTime, mutateTime, sortingTime):
         print(f"Population     : {self._population}")
         print(f"Selection rate : {self._selectRate}")
         print(f"Mutation rate  : {self._mutateRate}")
         print(f"Generations    : {generations}")
         print(f"Elapsed time   : {time:0.4f} seconds")
+        print(f"Time in select : {selectTime:0.4f} seconds")
+        print(f"Time in cross  : {crossTime:0.4f} seconds")
+        print(f"Time in mutate : {mutateTime:0.4f} seconds")
+        print(f"Time in sort   : {sortingTime:0.4f} seconds")
 
     def __print(self, list):
         for item in list:
