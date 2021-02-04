@@ -115,19 +115,13 @@ class ItinerarySearch(AbstractSearch):
         ax.axes.yaxis.set_visible(False)
         self.__ln, = ax.plot(0, 0, '-o')
 
-        abscissa = []
-        ordinates = []
         mostFit = self._generationMostFits[0]
-        for id in mostFit:
-            abscissa.append(self.__towns[id].x)
-            ordinates.append(self.__towns[id].y)
+        abscissa, ordinates = self._getXYData(mostFit)
 
         texts = []
         for x, y, id in zip(abscissa, ordinates, mostFit):
             texts.append(ax.text(x, y, self.__towns[id].name))
 
-        for txt in figure.texts:
-            txt.remove()
         # Adusting text so it don't overlap
         adjust_text(texts, autoalign='y',
                     only_move={'points': 'xy', 'text': 'xy'},
@@ -143,16 +137,18 @@ class ItinerarySearch(AbstractSearch):
     __updateGeneration = 0
 
     def __update(self, frame):
+        """Update the plot with next itinerary.
+
+        Show the most fit itinerary of each generations
+        """
+        # If we reached the last generation, do nothing
         if self.__updateGeneration >= len(self._generationMostFits):
             return self.__ln,
 
-        abscissa = []
-        ordinates = []
+
         mostFit = self._generationMostFits[self.__updateGeneration]
         self.__updateGeneration += 1
-        for id in mostFit:
-            abscissa.append(self.__towns[id].x)
-            ordinates.append(self.__towns[id].y)
+        abscissa, ordinates = self._getXYData(mostFit)
 
         # Adding first element a second time to link
         # the last point to the first
@@ -161,6 +157,22 @@ class ItinerarySearch(AbstractSearch):
 
         self.__ln.set_data(abscissa, ordinates)
         return self.__ln,
+
+    def _getXYData(self, itinerary):
+        """Get X and Y of each towns as two separate list
+
+        Used by matplotlib to plot a number of point at once
+        """
+        # X
+        abscissa = []
+        # Y
+        ordinates = []
+        # Each itinerary is a list of towns Ids
+        for townId in itinerary:
+            abscissa.append(self.__towns[townId].x)
+            ordinates.append(self.__towns[townId].y)
+
+        return abscissa, ordinates
 
     def _generatePopulation(self):
         """Generate random itinerary between towns.
@@ -268,7 +280,15 @@ class ItinerarySearch(AbstractSearch):
                     return True
             else:
                 self.__endCount = 0
-            self.__last = fitness
+        if fitness == self.__last:
+            self.__guardCount += 1
+        else:
+            self.__guardCount = 0
+
+        if self.__guardCount >= 100:
+            return True
+            
+        self.__last = fitness
         return False
 
     def _print(self, item):

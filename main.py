@@ -11,13 +11,13 @@ def main():
     # Higher rate of mutation give more stable results
     # while lower rate of mutation results are better
     # in best cases and worst in the worses cases
-    mutationRate = 70
+    mutationRate = 50
     # Lower selection rates works best combined with high population
     # High selection rates on high population can severly increase
     # computation time
-    selectionRate = 30
-    search = StringSearch("Je cherche cette phrase",
-                          population, mutationRate, selectionRate)
+    selectionRate = 50
+    # search = StringSearch("Isis est belle",
+    #                       population, mutationRate, selectionRate)
     # search.start()
 
     searchIt = ItinerarySearch(20, (1000, 1000), 10,

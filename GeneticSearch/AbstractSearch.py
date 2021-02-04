@@ -104,7 +104,7 @@ class AbstractSearch(ABC):
 
             self._generationMostFits.append(mostFit)
             self._print(mostFit)
-            print(self._fitness(mostFit))
+            # print(self._fitness(mostFit))
             if self._endCondition(mostFit):
                 break
 
